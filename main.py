@@ -2,7 +2,7 @@ from typing import Generic, TypeVar
 
 import marvin
 from flask import Flask, jsonify, render_template, request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 app = Flask(__name__)
 
@@ -14,24 +14,30 @@ class Item(BaseModel, Generic[T]):
 
 
 class Node(BaseModel):
-    id: str
-    label: str
+    id: str = Field(..., description="unique, human-readable ID for the node")
+    label: str = Field(..., description="Unaltered word or phrase from the input")
 
 
 class Edge(BaseModel):
-    source: str
-    target: str
-    label: str
+    """both source and target must be the ID of an existing node"""
+
+    source: str = Field(..., description="ID of the source node")
+    target: str = Field(..., description="ID of the target node")
+    label: str = Field(..., description="Word or phrase from the input")
 
 
 class Graph(BaseModel):
     """
-    MUST use a format where we can jsonify in python and feed directly
-    into cy.add(data); to display a graph on the front-end.
+    Represents a knowledge graph based on the input.
+    The format must be compatible with cy.add(data) for displaying the graph on the front-end.
     """
 
-    nodes: list[Item[Node]]
-    edges: list[Item[Edge]]
+    nodes: list[Item[Node]] = Field(
+        ..., description="List of nodes in the knowledge graph"
+    )
+    edges: list[Item[Edge]] = Field(
+        ..., description="List of edges in the knowledge graph"
+    )
 
 
 @marvin.fn(model_kwargs={"model": "gpt-4-turbo-preview"})
