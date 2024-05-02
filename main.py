@@ -37,8 +37,7 @@ class Edge(BaseModel):
 
 
 class Graph(BaseModel):
-    """
-    Represents a knowledge graph based on the input.
+    """Represents a knowledge graph based on the input.
     Format must be compatible with cy.add(data) for displaying the graph on the frontend
     """
 
@@ -50,7 +49,7 @@ class Graph(BaseModel):
     model_kwargs={"model": "gpt-4-turbo-preview"},
     client=AsyncMarvinClient(client=client),
 )
-def make_graph(text: str) -> Graph:
+def make_graph(text: str) -> Graph:  # noqa
     """You are an AI expert specializing in knowledge graph creation with the goal of
     capturing relationships based on a given input or request. Based on the user input
     in various forms such as paragraph, email, text files, and more. Your task is to
