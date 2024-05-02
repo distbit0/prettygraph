@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from marvin.beta.retries import retry_fn_on_validation_error
 from marvin.client import AsyncMarvinClient
 from openai import AsyncClient
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 app = FastAPI()
 client = AsyncClient()
@@ -30,7 +30,7 @@ class Node(BaseModel):
 
 
 class Edge(BaseModel):
-    """both source and target must be the ID of an existing node"""
+    """both source and target must be the ID of an EXISTING node"""
 
     source: str = Field(..., description="ID of the source node")
     target: str = Field(..., description="ID of the target node")
@@ -45,8 +45,22 @@ class Graph(BaseModel):
     nodes: list[Item[Node]] = Field(description="List of nodes in the knowledge graph")
     edges: list[Item[Edge]] = Field(description="List of edges in the knowledge graph")
 
+    @model_validator(mode="after")
+    def ensure_all_sources_and_targets_exist(self):
+        """surface errors with non-existing node so the LLM can try again"""
+        errors = []
+        node_ids = {node.data.id for node in self.nodes}
+        for edge in self.edges:
+            if edge.data.source not in node_ids:
+                errors.append(f"Source node {edge.data.source} not found in nodes")
+            if edge.data.target not in node_ids:
+                errors.append(f"Target node {edge.data.target} not found in nodes")
+        if errors:
+            raise ValueError(errors)
+        return self
 
-@retry_fn_on_validation_error
+
+@retry_fn_on_validation_error  # reask + content of validation error(s)
 @marvin.fn(
     model_kwargs={"model": "gpt-4-turbo-preview"},
     client=AsyncMarvinClient(client=client),
