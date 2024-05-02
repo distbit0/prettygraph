@@ -1,10 +1,20 @@
 from typing import Generic, TypeVar
 
+import logfire
 import marvin
-from flask import Flask, jsonify, render_template, request
+from fastapi import FastAPI, Request
+from fastapi.templating import Jinja2Templates
+from marvin.client import AsyncMarvinClient
+from openai import AsyncClient
 from pydantic import BaseModel, Field
 
-app = Flask(__name__)
+app = FastAPI()
+client = AsyncClient()
+logfire.configure(pydantic_plugin=logfire.PydanticPlugin(record="all"))
+logfire.instrument_fastapi(app)
+logfire.instrument_openai(client)
+
+templates = Jinja2Templates(directory="templates")
 
 T = TypeVar("T")
 
@@ -14,7 +24,7 @@ class Item(BaseModel, Generic[T]):
 
 
 class Node(BaseModel):
-    id: str = Field(..., description="unique, human-readable ID for the node")
+    id: str = Field(..., description="Unique, human-readable ID for the node")
     label: str = Field(..., description="Unaltered word or phrase from the input")
 
 
@@ -29,39 +39,39 @@ class Edge(BaseModel):
 class Graph(BaseModel):
     """
     Represents a knowledge graph based on the input.
-    The format must be compatible with cy.add(data) for displaying the graph on the front-end.
+    Format must be compatible with cy.add(data) for displaying the graph on the frontend
     """
 
-    nodes: list[Item[Node]] = Field(
-        ..., description="List of nodes in the knowledge graph"
-    )
-    edges: list[Item[Edge]] = Field(
-        ..., description="List of edges in the knowledge graph"
-    )
+    nodes: list[Item[Node]] = Field(description="List of nodes in the knowledge graph")
+    edges: list[Item[Edge]] = Field(description="List of edges in the knowledge graph")
 
 
-@marvin.fn(model_kwargs={"model": "gpt-4-turbo-preview"})
+@marvin.fn(
+    model_kwargs={"model": "gpt-4-turbo-preview"},
+    client=AsyncMarvinClient(client=client),
+)
 def make_graph(text: str) -> Graph:
     """You are an AI expert specializing in knowledge graph creation with the goal of
     capturing relationships based on a given input or request. Based on the user input
-    in various forms such as paragraph, email, text files, and more. Your task is to create
-    a knowledge graph based on the input. Nodes must have a label parameter, where the label
-    is a direct word or phrase from the input. Edges must also have a label parameter, where
-    the label is a direct word or phrase from the input.
+    in various forms such as paragraph, email, text files, and more. Your task is to
+    create a knowledge graph based on the input.
     """
 
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+@app.get("/")
+async def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.route("/update_graph", methods=["POST"])
-def update_graph():
-    text = request.json.get("text", "")
+@app.post("/update_graph")
+async def update_graph(request: Request):
+    data = await request.json()
+    text = data.get("text", "")
     graph_data = make_graph(text)
-    return jsonify(graph_data.model_dump())
+    return graph_data.model_dump()
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=80)
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=80)

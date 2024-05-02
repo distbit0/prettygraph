@@ -7,13 +7,7 @@ name = "prettygraph"
 version = "0.1.0"
 description = ""
 authors = [{ name = "Your Name", email = "you@example.com" }]
-dependencies = [
-    "flask>=3.0.0",
-    "gunicorn>=21.2.0",
-    "skills>=0.3.0",
-    "marvin",
-    "python-dotenv>=0.20.0",
-]
+dependencies = ["marvin"]
 requires-python = ">=3.10.0"
 
 [tool.pyright]
