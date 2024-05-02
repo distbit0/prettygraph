@@ -11,7 +11,7 @@ dependencies = [
     "flask>=3.0.0",
     "gunicorn>=21.2.0",
     "skills>=0.3.0",
-    "litellm>=1.35.33",
+    "marvin",
     "python-dotenv>=0.20.0",
 ]
 requires-python = ">=3.10.0"
