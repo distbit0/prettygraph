@@ -4,6 +4,7 @@ import logfire
 import marvin
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
+from marvin.beta.retries import retry_fn_on_validation_error
 from marvin.client import AsyncMarvinClient
 from openai import AsyncClient
 from pydantic import BaseModel, Field
@@ -45,6 +46,7 @@ class Graph(BaseModel):
     edges: list[Item[Edge]] = Field(description="List of edges in the knowledge graph")
 
 
+@retry_fn_on_validation_error
 @marvin.fn(
     model_kwargs={"model": "gpt-4-turbo-preview"},
     client=AsyncMarvinClient(client=client),
