@@ -93,3 +93,13 @@ This is an experimental project and may not handle all edge cases or inputs effe
 - use `marvin` instead of `lite-llm` (disclaimer: I'm the co-author of `marvin`)
 - `flask` -> `fastapi` (I prefer `fastapi` over `flask`) and `logfire` has out-of-the-box support for `fastapi`
 - add `logfire` for logging / tracing
+
+## Installation
+```shell
+gh repo clone zzstoatzz/prettygraph
+cd prettygraph
+uv venv
+source .venv/bin/activate
+uv pip install . -U
+uvicorn main:app --reload
+```
