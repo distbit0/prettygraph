@@ -62,14 +62,16 @@ class Graph(BaseModel):
 
 @retry_fn_on_validation_error  # reask + content of validation error(s)
 @marvin.fn(
-    model_kwargs={"model": "gpt-4-turbo-preview"},
+    model_kwargs={"model": "gpt-4-turbo-preview", "temperature": 1.8},
     client=AsyncMarvinClient(client=client),
 )
 def make_graph(text: str) -> Graph:  # noqa
     """You are an AI expert specializing in knowledge graph creation with the goal of
     capturing relationships based on a given input or request. Based on the user input
     in various forms such as paragraph, email, text files, and more. Your task is to
-    create a knowledge graph based on the input.
+    create a knowledge graph based on the input. Focus on capturing relationships between
+    isolated entities, and the relationships between them. Words and/or phrases may have
+    many different meanings / relationships, even within the same context.
     """
 
 
