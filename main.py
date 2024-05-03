@@ -86,9 +86,3 @@ async def update_graph(request: Request):
     text = data.get("text", "")
     graph_data = make_graph(text)
     return graph_data.model_dump()
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=80)

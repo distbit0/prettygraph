@@ -4,6 +4,17 @@
 
 ![prettygraph image](https://github.com/yoheinakajima/prettygraph/blob/main/prettygraph.jpeg?raw=true)
 
+## Original Documentation
+<details>
+
+<summary>Original Documentation</summary>
+
+# prettygraph
+
+**prettygraph** is a Python-based web application developed by [@yoheinakajima](https://twitter.com/yoheinakajima) to demonstrate a new UI pattern for text-to-knowledge graph generation. This project is a quick hack and not intended to be a robust framework, but a simple UI idea for dynamically highlighting the text input when generating knowledge graphs.
+
+![prettygraph image](https://github.com/yoheinakajima/prettygraph/blob/main/prettygraph.jpeg?raw=true)
+
 ## Overview
 
 The application uses Flask for the backend, rendering templates for the front end, and LiteLLM for generating predictions which transform text inputs into JSON formatted graph data. This data is then visualized using Cytoscape.js. It's important to note that the graph regenerates on every period insertion with real-time updates in the UI, providing an interactive experience.
@@ -74,3 +85,11 @@ For those interested in exploring more about knowledge graphs:
 ## Disclaimer
 
 This is an experimental project and may not handle all edge cases or inputs effectively.
+
+</details>
+
+## changes on this fork
+- got rid of poetry (I prefer `uv` -> `setuptools_scm` etc)
+- use `marvin` instead of `lite-llm` (disclaimer: I'm the co-author of `marvin`)
+- `flask` -> `fastapi` (I prefer `fastapi` over `flask`) and `logfire` has out-of-the-box support for `fastapi`
+- add `logfire` for logging / tracing
