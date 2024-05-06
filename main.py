@@ -1,6 +1,4 @@
 from typing import Generic, TypeVar
-
-import logfire
 import marvin
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
@@ -10,10 +8,8 @@ from openai import AsyncClient
 from pydantic import BaseModel, Field, model_validator
 
 app = FastAPI()
+
 client = AsyncClient()
-logfire.configure(pydantic_plugin=logfire.PydanticPlugin(record="all"))
-logfire.instrument_fastapi(app)
-logfire.instrument_openai(client)
 
 templates = Jinja2Templates(directory="templates")
 
@@ -39,6 +35,7 @@ class Edge(BaseModel):
 
 class Graph(BaseModel):
     """Represents a knowledge graph based on the input.
+
     Format must be compatible with cy.add(data) for displaying the graph on the frontend
     """
 
@@ -84,3 +81,9 @@ async def update_graph(request: Request):
     text = data.get("text", "")
     graph_data = make_graph(text)
     return graph_data.model_dump()
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
